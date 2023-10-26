@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "id": "product_1",
+      "name": "Accounting",
+      "description": "Seamless accounting software.Make tracking receipts, income, bank transactions, and more feel simple with the #1 small business accounting software",
+      "brand": "Apple",
+      "category": "Electronics",
+      "price": 89.99,
+      "image": "../assets/images/account1.jpg"
+    },
+    {
+      "id": "product_2",
+      "name": "Virtual Book-keeping",
+      "description": "Accurate books means stress free tax time.Partner with a Live Bookkeeper who understands your business. They’ll bring your existing financials up to date and manage your books with guaranteed accuracy.**",
+      "brand": "Apple",
+      "category": "Electronics",
+      "price": 599.99,
+      "image": "../assets/images/account2.jpg"
+    },
+    {
+      "id": "product_3",
+      "name": "Payroll",
+      "description": "Payroll services that go beyond a paycheck.Pay your team and access HR and benefits with the #1 payroll service provider",
+      "brand": "Cannon",
+      "category": "Electronics",
+      "price": 929.99,
+      "image": "../assets/images/account3.jpg"
+    },
+    {
+      "id": "product_4",
+      "name": "Time Tracking",
+      "description": "Time tracking software built for your business.Get on-the-go time tracking, tools to help you manage projects, and save up to 4% on payroll with QuickBooks Time",
+      "brand": "Sony",
+      "category": "Electronics",
+      "price": 399.99,
+      "image": "../assets/images/account4.jpg"
+    }
+  ]
+}
