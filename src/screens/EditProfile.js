@@ -1,59 +1,96 @@
 import { useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import { Container, TextField, Button, Grid } from "@mui/material";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { createUserProfile, updateUserProfile } from "../actions/userActions";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import {
+  createUserProfile,
+  updateUserProfile,
+  getUserDetails,
+} from "../actions/userActions";
 
 export default function EditProfile(props) {
   const dispatch = useDispatch();
   const theme = createTheme({
     palette: {
-      primary: { main: '#7ea68c', light: '#fff', contrastText: '#fff' },
-      secondary: { main: '#fff', light: '#6D6D64', contrastText: '#6D6D64' },
+      primary: { main: "#7ea68c", light: "#fff", contrastText: "#fff" },
+      secondary: { main: "#fff", light: "#6D6D64", contrastText: "#6D6D64" },
     },
     typography: {
-      fontSize: 12
-    }
+      fontSize: 12,
+    },
   });
 
-  const userData = useSelector(state => state.userDetails);
+  const userData = useSelector((state) => state.userDetails);
+  const [productValidation, setProductValidaion] = useState(false);
+  const [productList, setProductList] = useState([]);
   const [formData, setFormData] = useState();
-  const [newData, setNewData] = useState({})
+  const [userStatus, setUserStatus] = useState();
 
   useEffect(() => {
-    if (userData && Object.keys(userData).length > 0 && Object.keys(userData?.userInfo).length > 0) {
-      let x = userData?.userInfo
-      setFormData(
-        {
-          id: x.id,
-          companyName: x.companyName,
-          legalName: x.legalName,
-          businessAddress: {
-            line1: x.businessAddress.line1,
-            line2: x.businessAddress.line2,
-            city: x.businessAddress.city,
-            state: x.businessAddress.state,
-            zip: x.businessAddress.zip,
-            country: x.businessAddress.country,
-          },
-          legalAddress: {
-            line1: x.legalAddress.line1,
-            line2: x.legalAddress.line2,
-            city: x.legalAddress.city,
-            state: x.legalAddress.state,
-            zip: x.legalAddress.zip,
-            country: x.legalAddress.country
-          },
-          taxIdentifiers: {
-            pan: x.taxIdentifiers.pan,
-            ein: x.taxIdentifiers.ein
-          },
-          email: x.email,
-          website: x.website
-        }
-      )
+    let storeData = localStorage.getItem("userId");
+    if (storeData) {
+      dispatch(getUserDetails(storeData));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (
+      userData &&
+      Object.keys(userData).length > 0 &&
+      Object.keys(userData?.userInfo).length > 0
+    ) {
+      let x = userData?.userInfo;
+      let temp = x?.subscriptionValidations;
+      let statusArr = [];
+      let listArr = [];
+
+      if (temp && Object.keys(temp).length > 0) {
+        Object.keys(temp).map((k) => {
+          if (
+            temp[k]?.status.toLowerCase() === "success" ||
+            temp[k]?.status.toLowerCase() === "rejected"
+          ) {
+            temp[k]?.status.toLowerCase() === "success"
+              ? statusArr.push(true)
+              : statusArr.push(false);
+            listArr.push(k);
+          } else {
+            statusArr.push(false);
+          }
+        });
+      }
+      setProductList(listArr);
+      setProductValidaion(statusArr.includes(false));
+      setFormData({
+        userId: x.userId,
+        companyName: x.companyName,
+        legalName: x.legalName,
+        businessAddress: {
+          line1: x.businessAddress?.line1,
+          line2: x.businessAddress?.line2,
+          city: x.businessAddress?.city,
+          state: x.businessAddress?.state,
+          zip: x.businessAddress?.zip,
+          country: x.businessAddress?.country,
+        },
+        legalAddress: {
+          line1: x.legalAddress?.line1,
+          line2: x.legalAddress?.line2,
+          city: x.legalAddress?.city,
+          state: x.legalAddress?.state,
+          zip: x.legalAddress?.zip,
+          country: x.legalAddress?.country,
+        },
+        taxIdentifiers: {
+          pan: x.taxIdentifiers?.pan,
+          ein: x.taxIdentifiers?.ein,
+        },
+        email: x.email,
+        website: x.website,
+      });
+      setUserStatus(x.consolidatedStatus);
     }
   }, [userData]);
 
@@ -61,12 +98,17 @@ export default function EditProfile(props) {
     e.preventDefault();
     if (props.status) {
       // update profile
-      dispatch(updateUserProfile(formData.id, newData))
-    }else{
-      // create new profile if user status not found 
-      dispatch(createUserProfile(formData))
+      let obj = { ...formData, subscriptions: productList };
+      if (userStatus.toLowerCase() !== "in progress") {
+        dispatch(updateUserProfile(formData.userId, obj));
+      }
+    } else {
+      if (props && props.selectedProduct) {
+        // create new profile if user status not
+        let obj = { ...formData, subscriptions: [props.selectedProduct.id] };
+        dispatch(createUserProfile(obj));
+      }
     }
-
     props.handleClose();
   };
 
@@ -74,15 +116,13 @@ export default function EditProfile(props) {
     if (name) {
       setFormData({
         ...formData,
-        [name]: { ...formData[name], [e.target.name]: e.target.value }
-      })
-      setNewData({ ...newData, [name]: { ...newData[name], [e.target.name]: e.target.value } })
+        [name]: { ...formData[name], [e.target.name]: e.target.value },
+      });
     } else {
       setFormData({
         ...formData,
         [e.target.name]: e.target.value,
       });
-      setNewData({ ...newData, [e.target.name]: e.target.value })
     }
   };
 
@@ -92,8 +132,8 @@ export default function EditProfile(props) {
         <Box sx={{ width: "100%" }}>
           <form onSubmit={handleUpdate}>
             <TextField
-              id="email" 
-              value={formData?.email || ''}
+              id="email"
+              value={formData?.email || ""}
               name="email"
               label="Email"
               type="email"
@@ -110,7 +150,7 @@ export default function EditProfile(props) {
               type="text"
               label="Company Name"
               name="companyName"
-              value={formData?.companyName || ''}
+              value={formData?.companyName || ""}
               onChange={(e) => handleChangeProfile(e)}
               fullWidth
               margin="normal"
@@ -142,13 +182,20 @@ export default function EditProfile(props) {
             />
 
             <Grid item xs={12}>
-              <Typography variant="subtitle1" paddingY={2} color={'primary'} sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>Business Address</Typography>
+              <Typography
+                variant="subtitle1"
+                paddingY={2}
+                color={"primary"}
+                sx={{ fontWeight: "bold", textDecoration: "underline" }}
+              >
+                Business Address
+              </Typography>
 
               <TextField
                 label="line1"
                 name="line1"
                 value={formData?.businessAddress?.line1}
-                onChange={(e) => handleChangeProfile(e, 'businessAddress')}
+                onChange={(e) => handleChangeProfile(e, "businessAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -159,7 +206,7 @@ export default function EditProfile(props) {
                 label="line2"
                 name="line2"
                 value={formData?.businessAddress?.line2}
-                onChange={(e) => handleChangeProfile(e, 'businessAddress')}
+                onChange={(e) => handleChangeProfile(e, "businessAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -168,9 +215,9 @@ export default function EditProfile(props) {
 
               <TextField
                 label="city"
-                name="cityBusiness"
+                name="city"
                 value={formData?.businessAddress?.city}
-                onChange={(e) => handleChangeProfile(e, 'businessAddress')}
+                onChange={(e) => handleChangeProfile(e, "businessAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -179,9 +226,9 @@ export default function EditProfile(props) {
 
               <TextField
                 label="state"
-                name="stateBusiness"
+                name="state"
                 value={formData?.businessAddress?.state}
-                onChange={(e) => handleChangeProfile(e, 'businessAddress')}
+                onChange={(e) => handleChangeProfile(e, "businessAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -190,9 +237,9 @@ export default function EditProfile(props) {
 
               <TextField
                 label="zip"
-                name="zipBusiness"
+                name="zip"
                 value={formData?.businessAddress?.zip}
-                onChange={(e) => handleChangeProfile(e, 'businessAddress')}
+                onChange={(e) => handleChangeProfile(e, "businessAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -201,25 +248,31 @@ export default function EditProfile(props) {
 
               <TextField
                 label="country"
-                name="countryBusiness"
+                name="country"
                 value={formData?.businessAddress?.country}
-                onChange={(e) => handleChangeProfile(e, 'businessAddress')}
+                onChange={(e) => handleChangeProfile(e, "businessAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
                 InputLabelProps={{ shrink: true }}
               />
-
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="subtitle1" paddingY={2} color={'primary'} sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>Legal Address</Typography>
+              <Typography
+                variant="subtitle1"
+                paddingY={2}
+                color={"primary"}
+                sx={{ fontWeight: "bold", textDecoration: "underline" }}
+              >
+                Legal Address
+              </Typography>
 
               <TextField
                 label="line1"
                 name="line1"
                 value={formData?.legalAddress?.line1}
-                onChange={(e) => handleChangeProfile(e, 'legalAddress')}
+                onChange={(e) => handleChangeProfile(e, "legalAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -229,7 +282,7 @@ export default function EditProfile(props) {
                 label="line2"
                 name="line2"
                 value={formData?.legalAddress?.line2}
-                onChange={(e) => handleChangeProfile(e, 'legalAddress')}
+                onChange={(e) => handleChangeProfile(e, "legalAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -239,7 +292,7 @@ export default function EditProfile(props) {
                 label="city"
                 name="city"
                 value={formData?.legalAddress?.city}
-                onChange={(e) => handleChangeProfile(e, 'legalAddress')}
+                onChange={(e) => handleChangeProfile(e, "legalAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -249,19 +302,18 @@ export default function EditProfile(props) {
                 label="state"
                 name="state"
                 value={formData?.legalAddress?.state}
-                onChange={(e) => handleChangeProfile(e, 'legalAddress')}
+                onChange={(e) => handleChangeProfile(e, "legalAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
                 InputLabelProps={{ shrink: true }}
               />
 
-
               <TextField
                 label="zip"
                 name="zip"
                 value={formData?.legalAddress?.zip}
-                onChange={(e) => handleChangeProfile(e, 'legalAddress')}
+                onChange={(e) => handleChangeProfile(e, "legalAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -272,7 +324,7 @@ export default function EditProfile(props) {
                 label="country"
                 name="country"
                 value={formData?.legalAddress?.country}
-                onChange={(e) => handleChangeProfile(e, 'legalAddress')}
+                onChange={(e) => handleChangeProfile(e, "legalAddress")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -281,13 +333,20 @@ export default function EditProfile(props) {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="subtitle1" paddingY={2} color={'primary'} sx={{ fontWeight: 'bold', textDecoration: 'underline' }}>Tax Identifiers</Typography>
+              <Typography
+                variant="subtitle1"
+                paddingY={2}
+                color={"primary"}
+                sx={{ fontWeight: "bold", textDecoration: "underline" }}
+              >
+                Tax Identifiers
+              </Typography>
 
               <TextField
                 label="pan"
                 name="pan"
                 value={formData?.taxIdentifiers?.pan}
-                onChange={(e) => handleChangeProfile(e, 'taxIdentifiers')}
+                onChange={(e) => handleChangeProfile(e, "taxIdentifiers")}
                 fullWidth
                 margin="normal"
                 size="small"
@@ -298,25 +357,22 @@ export default function EditProfile(props) {
                 label="ein"
                 name="ein"
                 value={formData?.taxIdentifiers?.ein}
-                onChange={(e) => handleChangeProfile(e, 'taxIdentifiers')}
+                onChange={(e) => handleChangeProfile(e, "taxIdentifiers")}
                 fullWidth
                 margin="normal"
                 size="small"
                 InputLabelProps={{ shrink: true }}
               />
-
             </Grid>
 
             <Grid spacing={2} className="d-flex justify-content-end">
-
               <Button type="submit" variant="contained" color="primary">
-                {props.status ? 'Update' : 'Create'}
+                {props.status ? "Update" : "Create"}
               </Button>
             </Grid>
-
           </form>
         </Box>
-      </Container >
+      </Container>
     </ThemeProvider>
   );
 }

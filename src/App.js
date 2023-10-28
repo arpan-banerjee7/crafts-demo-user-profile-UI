@@ -8,6 +8,7 @@ import SignUpScreen from "./screens/SignUpScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import EditProfile from "./screens/EditProfile";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useState } from "react";
 
 function App() {
   const theme = createTheme({
@@ -15,14 +16,39 @@ function App() {
       primary: { main: "#7ea68c", light: "#fff", contrastText: "#fff" },
     },
   });
+  const [commonUserStatus, setUserStatus] = useState();
+  const [headerName, setHeaderName] = useState();
+  const [isCreated, setIsCreated] = useState();
 
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <Header />
+        <Header
+          statusChange={(e) => setUserStatus(e)}
+          headerHandler={(e) => setHeaderName(e)}
+          profileHandler={(e) => setIsCreated(e)}
+        />
         <Routes>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/:id" element={<HomeScreen />} />
+          <Route
+            path="/"
+            element={
+              <HomeScreen
+                commonUserStatus={commonUserStatus}
+                headerName={headerName}
+                isCreated={isCreated}
+              />
+            }
+          />
+          <Route
+            path="/:id"
+            element={
+              <HomeScreen
+                commonUserStatus={commonUserStatus}
+                headerName={headerName}
+                isCreated={isCreated}
+              />
+            }
+          />
           <Route path="/signin" element={<SignInScreen />} />
           <Route path="/signup" element={<SignUpScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />

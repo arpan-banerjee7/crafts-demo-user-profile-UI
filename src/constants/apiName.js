@@ -1,9 +1,9 @@
 export const apiConstant = {
-  CREATE_PROFILE: "/json/user.json",
+  CREATE_PROFILE: "/user/create",
   UPDATE_PROFILE: "/user/update",
-  LOGIN: "/api/user/login",
-  REGISTER: "/api/user/create",
-  GET_USER: "/json/user.json",
+  LOGIN: "/user/login",
+  REGISTER: "/user/create",
+  GET_USER: "/user",
   GET_PRODUCT: "/json/products.json",
-  GET_STATUS: "/json/user.json",
+  GET_STATUS: "/user/status",
 };
