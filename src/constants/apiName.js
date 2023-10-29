@@ -6,4 +6,5 @@ export const apiConstant = {
   GET_USER: "/user",
   GET_PRODUCT: "/json/products.json",
   GET_STATUS: "/user/status",
+  ADD_SUBSCRIPTION: "/user",
 };

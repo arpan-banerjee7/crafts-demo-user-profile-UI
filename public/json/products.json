@@ -2,7 +2,7 @@
   "products": [
     {
       "id": "product_1",
-      "name": "Accounting",
+      "name": "Smart Books",
       "description": "Seamless accounting software.Make tracking receipts, income, bank transactions, and more feel simple with the #1 small business accounting software",
       "brand": "Apple",
       "category": "Electronics",
@@ -11,7 +11,7 @@
     },
     {
       "id": "product_2",
-      "name": "Virtual Book-keeping",
+      "name": "Smart Books Payroll",
       "description": "Accurate books means stress free tax time.Partner with a Live Bookkeeper who understands your business. They’ll bring your existing financials up to date and manage your books with guaranteed accuracy.**",
       "brand": "Apple",
       "category": "Electronics",
@@ -20,7 +20,7 @@
     },
     {
       "id": "product_3",
-      "name": "Payroll",
+      "name": "Smart Books Payments",
       "description": "Payroll services that go beyond a paycheck.Pay your team and access HR and benefits with the #1 payroll service provider",
       "brand": "Cannon",
       "category": "Electronics",
@@ -29,7 +29,7 @@
     },
     {
       "id": "product_4",
-      "name": "Time Tracking",
+      "name": "SSheets",
       "description": "Time tracking software built for your business.Get on-the-go time tracking, tools to help you manage projects, and save up to 4% on payroll with QuickBooks Time",
       "brand": "Sony",
       "category": "Electronics",

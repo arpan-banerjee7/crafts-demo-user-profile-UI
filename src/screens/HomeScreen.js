@@ -8,6 +8,7 @@ import brandImg from "../assets/images/brand-image.png";
 import quality from "../assets/images/quality.png";
 import account3 from "../assets/images/account3.jpg";
 import {
+  addSubscription,
   getProduct,
   getUserDetails,
   updateUserProfile,
@@ -17,7 +18,6 @@ import { alertActions } from "../actions/alertAction";
 const DashboardPage = (props) => {
   const dispatch = useDispatch();
   const [productValidation, setProductValidaion] = useState(false);
-  const [productList, setProductList] = useState([]);
   const params = useParams();
   const qualities = [
     {
@@ -83,28 +83,12 @@ const DashboardPage = (props) => {
 
   useEffect(() => {
     if (userDetails?.userInfo && Object.keys(userDetails.userInfo).length > 0) {
-      let temp = userDetails?.userInfo?.subscriptionValidations;
-      let statusArr = [];
-      let listArr = [];
-      if (temp && Object.keys(temp).length > 0) {
-        Object.keys(temp).map((k) => {
-          if (
-            temp[k]?.status.toLowerCase() === "success" ||
-            temp[k]?.status.toLowerCase() === "rejected"
-          ) {
-            temp[k]?.status.toLowerCase() === "success"
-              ? statusArr.push(true)
-              : statusArr.push(false);
-            listArr.push(k);
-          } else {
-            statusArr.push(false);
-          }
-        });
-      }
-      setProductList(listArr);
-      setProductValidaion(statusArr.includes(false));
-      let data = userDetails.userInfo?.subscriptions ?? [];
-      setSubscribeProduct(listArr);
+      let temp = userDetails?.userInfo?.subscriptions;
+
+      setProductValidaion(
+        userDetails?.userInfo?.consolidatedStatus.toLowerCase() === "success"
+      );
+      setSubscribeProduct(temp);
       let obj = { ...userDetails.userInfo };
       delete obj.subscriptionValidations;
       setUserProfile(obj);
@@ -115,13 +99,16 @@ const DashboardPage = (props) => {
     let storedData = localStorage.getItem("userId");
     let finalProfile = { ...userProfile };
     delete finalProfile.consolidatedStatus;
-    let obj = { ...finalProfile, subscriptions: productList };
-    if (productList.includes(productId)) {
+    let obj = { ...finalProfile, subscriptions: subscribeProduct };
+    if (subscribeProduct.includes(productId)) {
       dispatch(alertActions.error("Already Subscribed"));
       return;
     }
-    if (!productValidation) {
-      obj = { ...finalProfile, subscriptions: [...productList, productId] };
+    if (productValidation) {
+      obj = {
+        ...finalProfile,
+        subscriptions: [...subscribeProduct, productId],
+      };
     } else {
       dispatch(
         alertActions.error(
@@ -134,7 +121,10 @@ const DashboardPage = (props) => {
       storedData &&
       userProfile?.consolidatedStatus.toLowerCase() !== "in progress"
     ) {
-      dispatch(updateUserProfile(storedData, obj));
+      dispatch(addSubscription(storedData, productId));
+      setTimeout(() => {
+        fetchUser();
+      }, 1100);
     } else {
       storedData
         ? dispatch(

@@ -52,6 +52,10 @@ const App = (props) => {
     { id: "product_3", name: "Smart Books Payments" },
     { id: "product_4", name: "SSheets" },
   ];
+  const productMap = dropdownList.reduce((acc, item) => {
+    acc[item.id] = item.name;
+    return acc;
+  }, {});
 
   const [alertRes, setAlertRes] = useState("");
 
@@ -91,8 +95,11 @@ const App = (props) => {
       let errorMessage = "";
       Object.keys(obj).map((x) => {
         if (obj[x]?.errors?.length > 0) {
+          console.log(x);
           errorMessage =
-            errorMessage + " " + `${x}: ${obj[x]?.errors.join(",")} `;
+            errorMessage +
+            " " +
+            `${productMap[x]}: ${obj[x]?.errors.join(",")} `;
         }
       });
       setRequiredField(errorMessage);
@@ -164,6 +171,8 @@ const App = (props) => {
     if (storeData) {
       dispatch(getUserStatus(storeData));
     }
+    handleClose();
+    handleClose2();
   };
 
   return (
@@ -245,7 +254,6 @@ const App = (props) => {
                   display={"flex"}
                   justifyContent={"space-between"}
                   alignItems={"center"}
-                  onClick={(e) => handleClick2(e)}
                 >
                   <Avatar
                     padding={2}
@@ -256,6 +264,7 @@ const App = (props) => {
                       border: "2px solid #e4f1e8",
                       cursor: "pointer",
                     }}
+                    onClick={(e) => handleClick2(e)}
                   />
                   <Box
                     display={"flex"}
@@ -286,6 +295,8 @@ const App = (props) => {
                   <MenuItem
                     onClick={() => {
                       setOpen(true);
+                      handleClose();
+                      handleClose2();
                     }}
                   >
                     Profile
@@ -365,7 +376,7 @@ const App = (props) => {
           id="responsive-dialog-title"
           className="d-flex justify-content-between align-items-center"
         >
-          <b>Profile Status : {userStatus}</b>
+          <b>Profile Verification Status : {userStatus}</b>
           <HighlightOffIcon
             className="pl-5"
             onClick={() => {

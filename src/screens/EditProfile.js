@@ -23,7 +23,6 @@ export default function EditProfile(props) {
   });
 
   const userData = useSelector((state) => state.userDetails);
-  const [productValidation, setProductValidaion] = useState(false);
   const [productList, setProductList] = useState([]);
   const [formData, setFormData] = useState();
   const [userStatus, setUserStatus] = useState();
@@ -42,27 +41,8 @@ export default function EditProfile(props) {
       Object.keys(userData?.userInfo).length > 0
     ) {
       let x = userData?.userInfo;
-      let temp = x?.subscriptionValidations;
-      let statusArr = [];
-      let listArr = [];
-
-      if (temp && Object.keys(temp).length > 0) {
-        Object.keys(temp).map((k) => {
-          if (
-            temp[k]?.status.toLowerCase() === "success" ||
-            temp[k]?.status.toLowerCase() === "rejected"
-          ) {
-            temp[k]?.status.toLowerCase() === "success"
-              ? statusArr.push(true)
-              : statusArr.push(false);
-            listArr.push(k);
-          } else {
-            statusArr.push(false);
-          }
-        });
-      }
-      setProductList(listArr);
-      setProductValidaion(statusArr.includes(false));
+      let temp = x?.subscriptions;
+      setProductList(temp);
       setFormData({
         userId: x.userId,
         companyName: x.companyName,

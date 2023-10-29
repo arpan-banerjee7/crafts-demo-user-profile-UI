@@ -99,7 +99,11 @@ export const updateUserProfile =
             type: userConstant.USER_UPDATE_PROFILE_SUCCESS,
             payload: user,
           });
-          dispatch(alertActions.success("Updated Successfully ..."));
+          dispatch(
+            alertActions.success(
+              "Rquest Submitted. Profile verification is under progress ..."
+            )
+          );
         },
         (error) => {
           dispatch({
@@ -107,6 +111,33 @@ export const updateUserProfile =
             payload: error,
           });
           dispatch(alertActions.success("Updated Successfully ..."));
+        }
+      );
+  };
+
+export const addSubscription =
+  (userId, productId) => async (dispatch, getState) => {
+    dispatch({ type: userConstant.ADD_SUBSCRIPTION_REQUEST });
+    const payload = { productId: productId };
+    commonService
+      .withTokenPut(
+        `${apiConstant.ADD_SUBSCRIPTION}/${userId}/subscriptions`,
+        payload
+      )
+      .then(
+        (doc) => {
+          dispatch({
+            type: userConstant.ADD_SUBSCRIPTION_SUCCESS,
+            payload: payload,
+          });
+          dispatch(alertActions.success("Verification under progress ..."));
+        },
+        (error) => {
+          dispatch({
+            type: userConstant.ADD_SUBSCRIPTION_FAILURE,
+            payload: error,
+          });
+          dispatch(alertActions.success("Verification failed..."));
         }
       );
   };
