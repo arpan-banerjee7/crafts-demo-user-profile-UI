@@ -78,7 +78,9 @@ export const createUserProfile = (user) => async (dispatch, getState) => {
       (doc) => {
         localStorage.setItem("userId", doc?.data?.userId);
         dispatch({ type: userConstant.CREATE_PROFILE_SUCCESS, payload: doc });
-        dispatch(alertActions.success("Profile Created Successfully ..."));
+        dispatch(
+          alertActions.success("Profile Verification is under progress ...")
+        );
       },
       (error) => {
         dispatch({ type: userConstant.CREATE_PROFILE_FAIL, payload: user });

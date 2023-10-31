@@ -36,7 +36,6 @@ const App = (props) => {
       createUser: state.createUser,
     };
   });
-
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorEl2, setAnchorEl2] = useState(null);
@@ -45,6 +44,7 @@ const App = (props) => {
   const [open, setOpen] = useState(false);
   const [headerName, setHeaderName] = useState("");
   const [requiredField, setRequiredField] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
   const [isPopup, setIsPopup] = useState(false);
   const dropdownList = [
     { id: "product_1", name: "Smart Books" },
@@ -56,7 +56,16 @@ const App = (props) => {
     acc[item.id] = item.name;
     return acc;
   }, {});
-
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Success":
+        return "green";
+      case "Rejected":
+        return "red";
+      default:
+        return "black";
+    }
+  };
   const [alertRes, setAlertRes] = useState("");
 
   const resetState = () => {
@@ -85,26 +94,21 @@ const App = (props) => {
   }, [createUser]);
 
   useEffect(() => {
-    if (
-      getStatus &&
-      getStatus.data &&
-      Object.keys(getStatus.data).length > 0 &&
-      Object.keys(getStatus.data.subscriptions).length > 0
-    ) {
-      let obj = getStatus.data.subscriptions;
-      let errorMessage = "";
-      Object.keys(obj).map((x) => {
+    if (getStatus && getStatus.data && Object.keys(getStatus.data).length > 0) {
+      const obj = getStatus.data.subscriptions;
+      let errorMessages = [];
+      Object.keys(obj).forEach((x) => {
         if (obj[x]?.errors?.length > 0) {
-          console.log(x);
-          errorMessage =
-            errorMessage +
-            " " +
-            `${productMap[x]}: ${obj[x]?.errors.join(",")} `;
+          errorMessages.push({
+            product: productMap[x],
+            errors: obj[x].errors,
+          });
         }
       });
-      setRequiredField(errorMessage);
-      setUserStatus(getStatus?.data?.consolidatedStatus.toLowerCase());
-      props.statusChange(getStatus?.data?.consolidatedStatus.toLowerCase());
+      setRequiredField(errorMessages); // Now this will set an array
+      setValidationMessage(getStatus.data.consolidatedMessage);
+      setUserStatus(getStatus.data.consolidatedStatus.toLowerCase());
+      props.statusChange(getStatus.data.consolidatedStatus.toLowerCase());
     }
   }, [getStatus]);
 
@@ -247,7 +251,9 @@ const App = (props) => {
               >
                 Join
               </Button>
-            ) : userStatus === "success" || userStatus === "rejected" ? (
+            ) : userStatus === "success" ||
+              userStatus === "rejected" ||
+              userStatus === "not complete" ? (
               <>
                 <Grid
                   item
@@ -388,9 +394,25 @@ const App = (props) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText color={"primary"}>
-            {requiredField && (
-              <Typography variant="subtitle1" color="error">
-                {requiredField}
+            {validationMessage && (
+              <Typography
+                variant="subtitle1"
+                style={{
+                  color: getStatusColor(getStatus?.data?.consolidatedStatus),
+                }}
+              >
+                {validationMessage}
+                <hr />
+                {requiredField.map((field, index) => (
+                  <div key={index}>
+                    <strong>{field.product}:</strong>
+                    <ul>
+                      {field.errors.map((error, errorIndex) => (
+                        <li key={errorIndex}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </Typography>
             )}
             {userStatus === "rejected" || userStatus === "success" ? (
@@ -411,7 +433,7 @@ const App = (props) => {
               </Box>
             ) : (
               <Typography variant="subtile1" color={"error"}>
-                Please try after sometime validation is in progress...
+                Please try after sometime. Or contact support.
               </Typography>
             )}
           </DialogContentText>
